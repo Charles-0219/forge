@@ -11,8 +11,8 @@
 - 本目录在 2026-10-15 从阶段 1 工作副本复制而来，包含运行时、测试、依赖锁、阶段 1 证据和项目文档。
 - 未复制虚拟环境、pytest 缓存、`.gov` 备份、个人会话、Memory、真实 `.env` 和真实 MCP 配置。
 
-## 分发远程
+## 分发
 
-Forge 使用所有者自己的远程。拟定地址是 `https://github.com/Charles-0219/forge`。仓库尚未创建，也尚未设置 `origin`。公开或私有、以及最终仓库名，确认后再创建。
-
-在许可证文本选定之前，不把本目录公开推送。权利已经确认，许可证种类还没有选定。
+- 许可证：MIT，见仓库根目录 `LICENSE`。版权声明使用 GitHub 账号 `Charles-0219`。
+- 分发远程：公开仓库 `https://github.com/Charles-0219/forge`。
+- `Biscuit-AI531/BearCode` 不是这个仓库的 `origin`。

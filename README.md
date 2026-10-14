@@ -2,7 +2,7 @@
 
 本目录是 BearCode 运行时的干净导入与已验证缺陷修复版。当前仅完成“底座核验”，尚未实现 Forge 事件内核、统一权限、数据库 Skill 门禁和服务端。
 
-权利与分发记录见 `PROVENANCE.md`。历史来源提交保留作技术基线；Forge 的分发远程不再使用 `Biscuit-AI531/BearCode`。
+许可证是 MIT。公开仓库是 <https://github.com/Charles-0219/forge>。权利与历史基线见 `PROVENANCE.md`。已批准的评测样本见 `evals/`。
 
 ## 来源与交付
 

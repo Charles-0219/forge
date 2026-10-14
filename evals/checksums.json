@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "approved_on": "2026-10-15",
+  "files": {
+    "suite.json": "b821c1b61f88505affd5e8b62ad12944a263e4894b082308419acbcce4d62d09",
+    "holdout.json": "aebe9178bec1490b49de2097a798c02e35e156bb5a13ce6a6727819511a1cfcb"
+  }
+}
