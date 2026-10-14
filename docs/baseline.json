@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "source_repository": "/Users/fuqinghua/Downloads/源码+简历+测评+全量文档/BearCode",
+  "baseline_commit": "9573e652bdd39ebd642da76be1f9f94171ffdece",
+  "baseline_ref": "main",
+  "original_checkout_changes": [
+    ".DS_Store"
+  ],
+  "import_rule": "Committed agents/*.py and requirements.txt only; no config, data, history or Git repository",
+  "files": [
+    {
+      "path": "agents/agent.py",
+      "baseline_sha256": "f985be3aac70de93d2be16403300feb1102427fe52636db0956ae4617a823652",
+      "phase1_sha256": "61d3cbf3e7e3019bf57965b72b4f66fda37cf09d2e7b32b44afcb73a422cf66e",
+      "modified": true
+    },
+    {
+      "path": "agents/frontmatter.py",
+      "baseline_sha256": "8913d22fe5cc582bc5dcb8521ccf516d3ab5fac1ed3a1f6fc1238e2e2a3768ef",
+      "phase1_sha256": "405abd4885c33bea08019bbcb9f08f6085ffe7939ce22f21e48f4ece04e92b1a",
+      "modified": true
+    },
+    {
+      "path": "agents/main.py",
+      "baseline_sha256": "b7fb323bf7e520c731ffcfe8de385c2a3426dc8e934307269efa27a085c4a360",
+      "phase1_sha256": "b7fb323bf7e520c731ffcfe8de385c2a3426dc8e934307269efa27a085c4a360",
+      "modified": false
+    },
+    {
+      "path": "agents/mcp_client.py",
+      "baseline_sha256": "c686018e60d049ac2f790c8926166f0cecd83c75c7c6db6857762ccbf1c44b6f",
+      "phase1_sha256": "c686018e60d049ac2f790c8926166f0cecd83c75c7c6db6857762ccbf1c44b6f",
+      "modified": false
+    },
+    {
+      "path": "agents/memory.py",
+      "baseline_sha256": "cfc5388ae6069bec03727bc128bd3f1ad66ddc0fd0853dcb184850ae777e51df",
+      "phase1_sha256": "de3d5a882e486ebe4316a0b5570c34177848157c982abb5311a22d178ad72fa9",
+      "modified": true
+    },
+    {
+      "path": "agents/online_skill_eval.py",
+      "baseline_sha256": "1ccfe237ecbb7debc1b6eda8bd71542fe88b3f10d6dd9ffece38c669bcfa913e",
+      "phase1_sha256": "1ccfe237ecbb7debc1b6eda8bd71542fe88b3f10d6dd9ffece38c669bcfa913e",
+      "modified": false
+    },
+    {
+      "path": "agents/online_skill_evolution.py",
+      "baseline_sha256": "2e38735db35dc91f7355126b8529fb18f69f9d7cdb78a43a078fc514f68b62e0",
+      "phase1_sha256": "2e38735db35dc91f7355126b8529fb18f69f9d7cdb78a43a078fc514f68b62e0",
+      "modified": false
+    },
+    {
+      "path": "agents/prompt.py",
+      "baseline_sha256": "d309f5654190ed75b477aadf230c236fe5bb58c334879562533f7943252a1636",
+      "phase1_sha256": "d309f5654190ed75b477aadf230c236fe5bb58c334879562533f7943252a1636",
+      "modified": false
+    },
+    {
+      "path": "agents/session.py",
+      "baseline_sha256": "99e281b49e1abfd894f7b42e3cc42d33e8dd786afc3b8c977f9de1d1197d1e8b",
+      "phase1_sha256": "99e281b49e1abfd894f7b42e3cc42d33e8dd786afc3b8c977f9de1d1197d1e8b",
+      "modified": false
+    },
+    {
+      "path": "agents/session_memory.py",
+      "baseline_sha256": "37a4197ff34db3896b1603819883feeefee933edc83b9309b7e25374dce37e04",
+      "phase1_sha256": "37a4197ff34db3896b1603819883feeefee933edc83b9309b7e25374dce37e04",
+      "modified": false
+    },
+    {
+      "path": "agents/skill_evolution.py",
+      "baseline_sha256": "a07d0b6ffb5e01e89be2a1c6292c223ddaa41cd96e8fb81be4050e1f04af40ef",
+      "phase1_sha256": "a07d0b6ffb5e01e89be2a1c6292c223ddaa41cd96e8fb81be4050e1f04af40ef",
+      "modified": false
+    },
+    {
+      "path": "agents/skills.py",
+      "baseline_sha256": "f304cd2411d47638f35dea12ecc81de70904464953728d3ea692dfb2f36efae0",
+      "phase1_sha256": "29be73da37709f181b29837df46f7584cafcb968cb3ffe266f4896a1f7748e7b",
+      "modified": true
+    },
+    {
+      "path": "agents/subagent.py",
+      "baseline_sha256": "0f8b9247437fdaf56d7db1ca8a0652811cae732c738896c6b2fb0d6a86b3a407",
+      "phase1_sha256": "7d571c3ed409dd369ef5bc5d60f42b3560e452801837dcc3c56d1479458d21b9",
+      "modified": true
+    },
+    {
+      "path": "agents/tools.py",
+      "baseline_sha256": "eaafd7dbd918461c16e1b5901434d52c33a4d7c9f518800f4a54324ffc4a1d83",
+      "phase1_sha256": "eaafd7dbd918461c16e1b5901434d52c33a4d7c9f518800f4a54324ffc4a1d83",
+      "modified": false
+    },
+    {
+      "path": "agents/ui.py",
+      "baseline_sha256": "da88507da68dc84d35ecd7ecdf0f56e177630873fbb8264255b1ad9bf1d7bae9",
+      "phase1_sha256": "da88507da68dc84d35ecd7ecdf0f56e177630873fbb8264255b1ad9bf1d7bae9",
+      "modified": false
+    },
+    {
+      "path": "requirements.txt",
+      "baseline_sha256": "89172127911b9898fcad5b4da9340439a3c2ec2c79f9a361fc473ab053ec5e26",
+      "phase1_sha256": "7599e681b265b7a91f771acb9773ea236705152d72d29fc0c6f455536e6129e0",
+      "modified": true
+    }
+  ]
+}

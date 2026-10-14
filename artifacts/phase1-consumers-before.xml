@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="6" time="0.892" timestamp="2026-10-14T23:52:35.144392+08:00" hostname="fuqinghuadeMacBook-Pro-2.local"><testcase classname="tests.test_consumer_regressions" name="test_custom_agent_empty_whitelist_stays_empty" time="0.002"><failure message="AssertionError: assert [{'name': 're...mand']}}, ...] == []&#10;  &#10;  Left contains 13 more items, first extra item: {'name': 'read_file', 'description': 'Read the contents of a file. Returns the file content with line numbers.', 'inpu...perties': {'file_path': {'type': 'string', 'description': 'The path to the file to read'}}, 'required': ['file_path']}}&#10;  Use -v to get more diff">/Users/fuqinghua/Desktop/codex/10.11bearcode/tests/test_consumer_regressions.py:13: in test_custom_agent_empty_whitelist_stays_empty
+    assert subagent.get_sub_agent_config("empty")["tools"] == []
+E   AssertionError: assert [{'name': 're...mand']}}, ...] == []
+E     
+E     Left contains 13 more items, first extra item: {'name': 'read_file', 'description': 'Read the contents of a file. Returns the file content with line numbers.', 'inpu...perties': {'file_path': {'type': 'string', 'description': 'The path to the file to read'}}, 'required': ['file_path']}}
+E     Use -v to get more diff</failure></testcase><testcase classname="tests.test_consumer_regressions" name="test_skill_fork_empty_whitelist_stays_empty" time="0.031"><failure message="AssertionError: assert [{'name': 're...mand']}}, ...] == []&#10;  &#10;  Left contains 13 more items, first extra item: {'name': 'read_file', 'description': 'Read the contents of a file. Returns the file content with line numbers.', 'inpu...perties': {'file_path': {'type': 'string', 'description': 'The path to the file to read'}}, 'required': ['file_path']}}&#10;  Use -v to get more diff">/Users/fuqinghua/Desktop/codex/10.11bearcode/tests/test_consumer_regressions.py:31: in test_skill_fork_empty_whitelist_stays_empty
+    assert created[0]["custom_tools"] == []
+E   AssertionError: assert [{'name': 're...mand']}}, ...] == []
+E     
+E     Left contains 13 more items, first extra item: {'name': 'read_file', 'description': 'Read the contents of a file. Returns the file content with line numbers.', 'inpu...perties': {'file_path': {'type': 'string', 'description': 'The path to the file to read'}}, 'required': ['file_path']}}
+E     Use -v to get more diff</failure></testcase><testcase classname="tests.test_consumer_regressions" name="test_memory_invalid_typed_metadata_is_not_loaded[name: [bad]]" time="0.002"><failure message="assert [&lt;agents.memo... 0x1070ab420&gt;] == []&#10;  &#10;  Left contains one more item: &lt;agents.memory.MemoryEntry object at 0x1070ab420&gt;&#10;  Use -v to get more diff">/Users/fuqinghua/Desktop/codex/10.11bearcode/tests/test_consumer_regressions.py:40: in test_memory_invalid_typed_metadata_is_not_loaded
+    assert memory.list_memories() == []
+E   assert [&lt;agents.memo... 0x1070ab420&gt;] == []
+E     
+E     Left contains one more item: &lt;agents.memory.MemoryEntry object at 0x1070ab420&gt;
+E     Use -v to get more diff</failure></testcase><testcase classname="tests.test_consumer_regressions" name="test_memory_invalid_typed_metadata_is_not_loaded[description: true]" time="0.001"><failure message="assert [&lt;agents.memo... 0x106d5bfb0&gt;] == []&#10;  &#10;  Left contains one more item: &lt;agents.memory.MemoryEntry object at 0x106d5bfb0&gt;&#10;  Use -v to get more diff">/Users/fuqinghua/Desktop/codex/10.11bearcode/tests/test_consumer_regressions.py:40: in test_memory_invalid_typed_metadata_is_not_loaded
+    assert memory.list_memories() == []
+E   assert [&lt;agents.memo... 0x106d5bfb0&gt;] == []
+E     
+E     Left contains one more item: &lt;agents.memory.MemoryEntry object at 0x106d5bfb0&gt;
+E     Use -v to get more diff</failure></testcase><testcase classname="tests.test_consumer_regressions" name="test_memory_invalid_typed_metadata_is_not_loaded[type: [project]]" time="0.001" /><testcase classname="tests.test_consumer_regressions" name="test_memory_headers_reject_nontext_description" time="0.001"><failure message="assert [&lt;agents.memo... 0x106e1dbc0&gt;] == []&#10;  &#10;  Left contains one more item: &lt;agents.memory.MemoryHeader object at 0x106e1dbc0&gt;&#10;  Use -v to get more diff">/Users/fuqinghua/Desktop/codex/10.11bearcode/tests/test_consumer_regressions.py:48: in test_memory_headers_reject_nontext_description
+    assert memory.scan_memory_headers() == []
+E   assert [&lt;agents.memo... 0x106e1dbc0&gt;] == []
+E     
+E     Left contains one more item: &lt;agents.memory.MemoryHeader object at 0x106e1dbc0&gt;
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>
