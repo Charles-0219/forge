@@ -9,8 +9,8 @@
   "suite_ref": "evals/suite.json",
   "usd_per_million": "1.20",
   "pricing_basis": "所有者于 2026-10-15 选定官方峰值输出价。调用时仍须设置 FORGE_USD_PER_MILLION。",
-  "a_passed": 192,
-  "a_total": 192,
-  "runtime_digest": "256165a52fce6dc6894db28143f677f18fed64af8c539fbfbad7a4c87a8401bd",
+  "a_passed": 193,
+  "a_total": 193,
+  "runtime_digest": "d2f7cdbdf9915b51f9519b2f98e3246ca43090a710d33918dc76851c1165d079",
   "recorded_on": "2026-10-15"
 }
