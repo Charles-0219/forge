@@ -1,6 +1,10 @@
 anthropic>=0.25.0
 PyYAML>=6.0,<7
+aiosqlite>=0.20,<1
+alembic>=1.14,<2
+greenlet>=3,<4
 openai>=1.0.0
 python-dotenv>=1.0.0
 rich>=13.0.0
+sqlalchemy>=2,<2.1
 tqdm>=4.66.0

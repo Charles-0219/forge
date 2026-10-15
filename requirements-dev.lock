@@ -1,16 +1,23 @@
-# Verified phase-1 environment: Python 3.11.16, macOS arm64.
+# Verified environment: Python 3.11.16, macOS arm64.
 # Exact installed versions; this is a version lock, not a wheel/hash lock.
+# Phase 2 added aiosqlite, alembic, greenlet, Mako, MarkupSafe, and SQLAlchemy.
+# Phase 1 pins were not refloated.
+aiosqlite==0.22.1
+alembic==1.20.0
 annotated-types==0.8.0
 anthropic==1.13.0
 anyio==4.15.1
 docstring-parser==0.18.0
+greenlet==3.5.6
 h11==0.16.0
 httpcore2==2.13.1
 httpx2==2.13.1
 idna==3.20
 iniconfig==2.3.1
 jiter==0.17.0
+Mako==1.4.3
 markdown-it-py==4.2.0
+MarkupSafe==3.0.4
 mdurl==0.1.2
 openai==3.31.0
 packaging==26.3
@@ -24,6 +31,7 @@ python-dotenv==1.2.4
 pyyaml==6.0.3
 rich==15.0.0
 sniffio==1.3.1
+SQLAlchemy==2.0.54
 tqdm==4.70.1
 truststore==0.10.5
 typing-extensions==4.16.0

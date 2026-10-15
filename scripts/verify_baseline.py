@@ -22,7 +22,10 @@ def main() -> int:
             failures.append(str(relative))
             continue
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
-        if digest != item["phase1_sha256"]:
+        expected = item.get("current_sha256", item["phase1_sha256"])
+        if digest != expected:
+            failures.append(str(relative))
+        if str(relative).startswith("agents/") and digest != item["phase1_sha256"]:
             failures.append(str(relative))
     if failures:
         print("Hash mismatch or missing file: " + ", ".join(failures))

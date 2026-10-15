@@ -4,6 +4,8 @@
 
 许可证是 MIT。公开仓库是 <https://github.com/Charles-0219/forge>。权利与历史基线见 `PROVENANCE.md`。已批准的评测样本见 `evals/`。
 
+阶段 2 增加了 `forge/` 事件内核。它记录会话、动作和双协议投影，并把同一套行为落到内存或 SQLite。它不执行工具，也不替换 `agents/` 里的原循环。结果见 `docs/phase2-report.md`。
+
 ## 来源与交付
 
 - 基线提交：`9573e652bdd39ebd642da76be1f9f94171ffdece`。
@@ -20,8 +22,9 @@
 uv venv --python 3.11 .venv
 uv pip sync --python .venv/bin/python requirements-dev.lock
 .venv/bin/python -m pytest -q
-.venv/bin/python -m compileall -q agents tests scripts
+.venv/bin/python -m compileall -q agents forge tests scripts alembic
 .venv/bin/python scripts/verify_baseline.py
+.venv/bin/python scripts/verify_eval_freeze.py
 uv pip check --python .venv/bin/python
 ```
 
@@ -31,4 +34,4 @@ uv pip check --python .venv/bin/python
 
 ## 进入下一阶段
 
-第一阶段回归门禁已通过。开始阶段 2 前应建立项目 Git 仓库并提交本阶段快照、确认接口边界与上游使用授权。后续实现需要明确的新阶段指令；部署或公开分发前必须核实上游许可证。
+阶段 2 的投影和事务测试已通过。阶段 3 需要单独授权。在那之前，不把 Dispatcher、真实工具执行或 DeepSeek 调用接进事件内核。

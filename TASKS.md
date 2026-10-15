@@ -24,11 +24,17 @@ Known later-phase risks and publication-license prerequisites remain open; see t
 - [x] Phase 5 live protocol is OpenAI-compatible `deepseek-flash`, thinking disabled, with a 15 USD cap for one full C-suite run.
 - [x] Eval drafts S1–S8, Q1–Q20, D1–D12, and H1–H8 are approved and frozen under `evals/`.
 
-Phase 2 implementation remains unauthorized.
+## Phase 2: event kernel (complete)
+
+- [x] Add in-memory and SQLite event stores behind one kernel.
+- [x] Add the first Alembic migration for conversations, events, runs, actions, and approvals.
+- [x] Adapt simulated OpenAI and Anthropic responses into paired actions.
+- [x] Project recorded context without rereading disk or calling a model.
+- [x] Keep the phase-1 agent runtime hashes and regressions green.
+
+Evidence: `docs/phase2-report.md`. Phase 3 remains unauthorized.
 
 ## Later phases: not authorized in this task
-
-- [ ] Phase 2: adapters, event store, protocol projector, SQLite persistence.
 - [ ] Phase 3: unified policy/dispatch, approvals, async execution, lifecycle and recovery.
 - [ ] Phase 4: MCP/subagent/Memory/config isolation and shared root budgets.
 - [ ] Phase 5: database Skill gate, isolated real evaluation, promotion and export.
