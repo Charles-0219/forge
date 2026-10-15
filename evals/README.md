@@ -8,7 +8,7 @@
 | `holdout.json` | H1–H8 |
 | `checksums.json` | 上述两个文件的 SHA-256 |
 
-C 套约定：模型 `deepseek-flash`，OpenAI 兼容地址 `https://api.deepseek.com`，关闭思考，一次完整运行费用硬上限 15 美元。阶段 5 之前不发起真实调用。
+C 套约定：模型 `deepseek-flash`，OpenAI 兼容地址 `https://api.deepseek.com`，关闭思考，一次完整运行费用硬上限 15 美元。真实调用只从 `scripts/run_live_eval.py --confirm-live` 进入，并且要同时提供 `APIKEY` 和 `FORGE_USD_PER_MILLION`。回归测试不会走到这一步。
 
 `holdout.json` 随公开仓库可见。晋升时仍然禁止把留出题写进 Skill 候选和开发提示。对外不能声称这些题目对读过仓库的人不可见。
 

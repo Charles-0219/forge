@@ -72,6 +72,8 @@ class Kernel:
                 raise Conflict("client_request_id conflicts with a different message")
             if await unit.get_active_run(conversation_id) is not None:
                 raise Conflict("conversation has a non-terminal run")
+            if any(report.status == "running" for report in await unit.list_eval_reports()):
+                raise Conflict("an evaluation occupies the execution slot")
             run = Run(
                 id=new_id(),
                 conversation_id=conversation_id,

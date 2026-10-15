@@ -62,3 +62,9 @@
 阶段 4 只改了 `agents/agent.py` 里两处子代理构造：非 plan 的 `permission_mode` 从 `bypassPermissions` 改为 `default`。旧循环的同步 Shell、`agents/tools.py` 和 `agents/mcp_client.py` 里的子进程，以及 `agents/main.py` 把 `--yolo` 映射成 `bypassPermissions`，都还在。
 
 新的 `forge/` 路径里，子任务串行返回、不能嵌套，模型调用计入根预算。explore 和 plan 由策略限制为只读。MCP 只启动调用方传入的 stdio 配置，超时、断开和协议错误记成失败观察。Skill、agent、权限缓存按目录和配置版本隔离，Memory 写在项目 `.forge/memory/` 下。配置优先级与阶段 1 相同，解析器只接收调用方给出的字典。
+
+## 阶段 5 Skill 门禁
+
+阶段 5 没有修改 `agents/*.py`。旧循环仍会直接写 Skill 文件，留到阶段 6。
+
+新的 `forge/skills.py` 只把数据库里的 active 版本交给检索、inline 和 fork。自动提案、外部文件变化和显式创建都先成为候选。批准冻结内容哈希。导出失败只记下错误，不改变 active。评测占用单独的执行槽。留出样本不能进入候选开发输入。真实 C 套调用要手动确认，并且只有给出单价时才执行 15 美元上限。回归测试没有连接模型。

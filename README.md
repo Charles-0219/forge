@@ -1,6 +1,6 @@
 # Forge：第一阶段底座
 
-本目录是 BearCode 运行时的干净导入与已验证缺陷修复版。当前仅完成“底座核验”，尚未实现 Forge 事件内核、统一权限、数据库 Skill 门禁和服务端。
+本目录是 BearCode 运行时的干净导入。阶段 1 到阶段 5 已在本地实现并通过测试。服务端和 CLI 迁移留在阶段 6。
 
 许可证是 MIT。公开仓库是 <https://github.com/Charles-0219/forge>。权利与历史基线见 `PROVENANCE.md`。已批准的评测样本见 `evals/`。
 
@@ -9,6 +9,8 @@
 阶段 3 在同一内核上增加策略、审批、六个内置工具、恢复和折叠。执行入口是 `Coordinator`，不替换 `agents/` 里的原循环。结果见 `docs/phase3-report.md`。
 
 阶段 4 把子任务、预先配置的 stdio MCP、Memory 和配置缓存放进同一条执行路径。子代理不再用 `bypassPermissions` 创建。结果见 `docs/phase4-report.md`。
+
+阶段 5 把 Skill 放进数据库门禁。只有 active 版本能被检索或 fork。候选要先批准，再由手动评测决定是否晋升。结果见 `docs/phase5-report.md`。
 
 ## 来源与交付
 
@@ -38,4 +40,4 @@ uv pip check --python .venv/bin/python
 
 ## 进入下一阶段
 
-阶段 3 的执行测试已通过。阶段 4 已在本地实现，尚未推送。阶段 5 需要单独授权。在那之前，不把 Dispatcher 接进 `Agent.chat`，也不调用 DeepSeek。
+阶段 5 的门禁测试已通过。真实 C 套仍要手动启动，并受 15 美元上限约束。阶段 6 需要单独授权。在那之前，不把 Dispatcher 或 Skill 门禁接进 `Agent.chat`。

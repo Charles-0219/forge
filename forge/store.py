@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator, Callable
 
 from forge.events import Action, Approval, Conversation, Event, Run
+from forge.skill_records import EvalReport, Skill, SkillVersion
 
 
 class UnitOfWork(ABC):
@@ -97,6 +98,58 @@ class UnitOfWork(ABC):
 
     @abstractmethod
     async def count_approvals(self) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def insert_skill(self, skill: Skill) -> Skill:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_skill(self, skill_id: str) -> Skill | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_skill_by_name(self, scope: str, name: str) -> Skill | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def list_skills(self) -> list[Skill]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update_skill(self, skill: Skill) -> Skill:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def insert_skill_version(self, version: SkillVersion) -> SkillVersion:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_skill_version(self, version_id: str) -> SkillVersion | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def list_skill_versions(self, skill_id: str | None = None) -> list[SkillVersion]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update_skill_version(self, version: SkillVersion) -> SkillVersion:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def insert_eval_report(self, report: EvalReport) -> EvalReport:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_eval_report(self, report_id: str) -> EvalReport | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def list_eval_reports(self) -> list[EvalReport]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update_eval_report(self, report: EvalReport) -> EvalReport:
         raise NotImplementedError
 
 

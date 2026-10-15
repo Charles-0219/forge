@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 
 from forge.events import TERMINAL_RUN_STATES, Action, Approval, Conversation, Event, Run
+from forge.skill_records import EvalReport, Skill, SkillVersion
 from forge.store import EventStore, UnitOfWork
 
 
@@ -15,6 +16,9 @@ class _MemoryState:
         self.events: dict[str, list[Event]] = {}
         self.actions: dict[str, Action] = {}
         self.approvals: dict[str, Approval] = {}
+        self.skills: dict[str, Skill] = {}
+        self.skill_versions: dict[str, SkillVersion] = {}
+        self.eval_reports: dict[str, EvalReport] = {}
 
 
 class MemoryUnitOfWork(UnitOfWork):
@@ -131,6 +135,63 @@ class MemoryUnitOfWork(UnitOfWork):
 
     async def count_approvals(self) -> int:
         return len(self._state.approvals)
+
+    async def insert_skill(self, skill: Skill) -> Skill:
+        self._before_write()
+        self._state.skills[skill.id] = skill
+        return skill
+
+    async def get_skill(self, skill_id: str) -> Skill | None:
+        return self._state.skills.get(skill_id)
+
+    async def get_skill_by_name(self, scope: str, name: str) -> Skill | None:
+        for skill in self._state.skills.values():
+            if skill.scope == scope and skill.name == name:
+                return skill
+        return None
+
+    async def list_skills(self) -> list[Skill]:
+        return list(self._state.skills.values())
+
+    async def update_skill(self, skill: Skill) -> Skill:
+        self._before_write()
+        self._state.skills[skill.id] = skill
+        return skill
+
+    async def insert_skill_version(self, version: SkillVersion) -> SkillVersion:
+        self._before_write()
+        self._state.skill_versions[version.id] = version
+        return version
+
+    async def get_skill_version(self, version_id: str) -> SkillVersion | None:
+        return self._state.skill_versions.get(version_id)
+
+    async def list_skill_versions(self, skill_id: str | None = None) -> list[SkillVersion]:
+        versions = list(self._state.skill_versions.values())
+        if skill_id is None:
+            return versions
+        return [version for version in versions if version.skill_id == skill_id]
+
+    async def update_skill_version(self, version: SkillVersion) -> SkillVersion:
+        self._before_write()
+        self._state.skill_versions[version.id] = version
+        return version
+
+    async def insert_eval_report(self, report: EvalReport) -> EvalReport:
+        self._before_write()
+        self._state.eval_reports[report.id] = report
+        return report
+
+    async def get_eval_report(self, report_id: str) -> EvalReport | None:
+        return self._state.eval_reports.get(report_id)
+
+    async def list_eval_reports(self) -> list[EvalReport]:
+        return list(self._state.eval_reports.values())
+
+    async def update_eval_report(self, report: EvalReport) -> EvalReport:
+        self._before_write()
+        self._state.eval_reports[report.id] = report
+        return report
 
 
 class MemoryEventStore(EventStore):

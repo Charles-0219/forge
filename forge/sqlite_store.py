@@ -9,7 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from forge.events import TERMINAL_RUN_STATES, Action, Approval, Conversation, Event, Run
 from forge.migrate import upgrade
-from forge.schema import ActionRow, ApprovalRow, ConversationRow, EventRow, RunRow
+from forge.skill_records import EvalReport, Skill, SkillVersion
+from forge.schema import ActionRow, ApprovalRow, ConversationRow, EvalReportRow, EventRow, RunRow, SkillRow, SkillVersionRow
 from forge.store import EventStore, UnitOfWork
 
 
@@ -83,6 +84,47 @@ def _approval(row: ApprovalRow) -> Approval:
         arguments=dict(row.arguments) if row.arguments is not None else None,
         status=row.status or "pending",
         basis=dict(row.basis) if row.basis is not None else None,
+    )
+
+
+def _skill(row: SkillRow) -> Skill:
+    return Skill(
+        id=row.id,
+        name=row.name,
+        scope=row.scope,
+        active_version_id=row.active_version_id,
+        export_error=row.export_error,
+        created_at=row.created_at,
+    )
+
+
+def _version(row: SkillVersionRow) -> SkillVersion:
+    return SkillVersion(
+        id=row.id,
+        skill_id=row.skill_id,
+        content=row.content,
+        content_hash=row.content_hash,
+        source=row.source,
+        evidence=list(row.evidence or []),
+        parent_version_id=row.parent_version_id,
+        status=row.status,
+        suite_ref=row.suite_ref,
+        block_reason=row.block_reason,
+        created_at=row.created_at,
+    )
+
+
+def _report(row: EvalReportRow) -> EvalReport:
+    return EvalReport(
+        id=row.id,
+        version_id=row.version_id,
+        status=row.status,
+        baseline=dict(row.baseline or {}),
+        results=dict(row.results) if row.results is not None else None,
+        promoted=bool(row.promoted),
+        reason=row.reason,
+        cost_usd=row.cost_usd,
+        created_at=row.created_at,
     )
 
 
@@ -296,6 +338,122 @@ class SqliteUnitOfWork(UnitOfWork):
     async def count_approvals(self) -> int:
         result = await self._session.execute(select(ApprovalRow.id))
         return len(list(result.scalars()))
+
+    async def insert_skill(self, skill: Skill) -> Skill:
+        self._before_write()
+        self._session.add(SkillRow(
+            id=skill.id,
+            name=skill.name,
+            scope=skill.scope,
+            active_version_id=skill.active_version_id,
+            export_error=skill.export_error,
+            created_at=skill.created_at,
+        ))
+        await self._session.flush()
+        return skill
+
+    async def get_skill(self, skill_id: str) -> Skill | None:
+        row = await self._session.get(SkillRow, skill_id)
+        return _skill(row) if row else None
+
+    async def get_skill_by_name(self, scope: str, name: str) -> Skill | None:
+        result = await self._session.execute(
+            select(SkillRow).where(SkillRow.scope == scope, SkillRow.name == name)
+        )
+        row = result.scalar_one_or_none()
+        return _skill(row) if row else None
+
+    async def list_skills(self) -> list[Skill]:
+        result = await self._session.execute(select(SkillRow))
+        return [_skill(row) for row in result.scalars()]
+
+    async def update_skill(self, skill: Skill) -> Skill:
+        self._before_write()
+        row = await self._session.get(SkillRow, skill.id)
+        if row is None:
+            raise KeyError(skill.id)
+        row.active_version_id = skill.active_version_id
+        row.export_error = skill.export_error
+        await self._session.flush()
+        return _skill(row)
+
+    async def insert_skill_version(self, version: SkillVersion) -> SkillVersion:
+        self._before_write()
+        self._session.add(SkillVersionRow(
+            id=version.id,
+            skill_id=version.skill_id,
+            content=version.content,
+            content_hash=version.content_hash,
+            source=version.source,
+            evidence=list(version.evidence),
+            parent_version_id=version.parent_version_id,
+            status=version.status,
+            suite_ref=version.suite_ref,
+            block_reason=version.block_reason,
+            created_at=version.created_at,
+        ))
+        await self._session.flush()
+        return version
+
+    async def get_skill_version(self, version_id: str) -> SkillVersion | None:
+        row = await self._session.get(SkillVersionRow, version_id)
+        return _version(row) if row else None
+
+    async def list_skill_versions(self, skill_id: str | None = None) -> list[SkillVersion]:
+        statement = select(SkillVersionRow)
+        if skill_id is not None:
+            statement = statement.where(SkillVersionRow.skill_id == skill_id)
+        result = await self._session.execute(statement)
+        return [_version(row) for row in result.scalars()]
+
+    async def update_skill_version(self, version: SkillVersion) -> SkillVersion:
+        self._before_write()
+        row = await self._session.get(SkillVersionRow, version.id)
+        if row is None:
+            raise KeyError(version.id)
+        row.status = version.status
+        row.suite_ref = version.suite_ref
+        row.block_reason = version.block_reason
+        await self._session.flush()
+        return _version(row)
+
+    async def insert_eval_report(self, report: EvalReport) -> EvalReport:
+        self._before_write()
+        self._session.add(EvalReportRow(
+            id=report.id,
+            version_id=report.version_id,
+            status=report.status,
+            baseline=dict(report.baseline),
+            results=None if report.results is None else dict(report.results),
+            promoted=1 if report.promoted else 0,
+            reason=report.reason,
+            cost_usd=report.cost_usd,
+            created_at=report.created_at,
+        ))
+        await self._session.flush()
+        return report
+
+    async def get_eval_report(self, report_id: str) -> EvalReport | None:
+        row = await self._session.get(EvalReportRow, report_id)
+        return _report(row) if row else None
+
+    async def list_eval_reports(self) -> list[EvalReport]:
+        result = await self._session.execute(select(EvalReportRow))
+        return [_report(row) for row in result.scalars()]
+
+    async def update_eval_report(self, report: EvalReport) -> EvalReport:
+        self._before_write()
+        row = await self._session.get(EvalReportRow, report.id)
+        if row is None:
+            raise KeyError(report.id)
+        row.status = report.status
+        row.baseline = dict(report.baseline)
+        row.results = None if report.results is None else dict(report.results)
+        row.promoted = 1 if report.promoted else 0
+        row.reason = report.reason
+        row.cost_usd = report.cost_usd
+        await self._session.flush()
+        return _report(row)
 
 
 class SqliteEventStore(EventStore):

@@ -84,3 +84,45 @@ class ApprovalRow(Base):
     arguments: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     status: Mapped[str | None] = mapped_column(String(32), nullable=True)
     basis: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+
+class SkillRow(Base):
+    __tablename__ = "skills"
+    __table_args__ = (UniqueConstraint("scope", "name", name="uq_skills_scope_name"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    name: Mapped[str] = mapped_column(String(200))
+    scope: Mapped[str] = mapped_column(String(400))
+    active_version_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    export_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[str] = mapped_column(String(40))
+
+
+class SkillVersionRow(Base):
+    __tablename__ = "skill_versions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    skill_id: Mapped[str] = mapped_column(ForeignKey("skills.id"))
+    content: Mapped[str] = mapped_column(Text)
+    content_hash: Mapped[str] = mapped_column(String(64))
+    source: Mapped[str] = mapped_column(String(32))
+    evidence: Mapped[list] = mapped_column(JSON)
+    parent_version_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    status: Mapped[str] = mapped_column(String(32))
+    suite_ref: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    block_reason: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    created_at: Mapped[str] = mapped_column(String(40))
+
+
+class EvalReportRow(Base):
+    __tablename__ = "eval_reports"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    version_id: Mapped[str] = mapped_column(ForeignKey("skill_versions.id"))
+    status: Mapped[str] = mapped_column(String(32))
+    baseline: Mapped[dict] = mapped_column(JSON)
+    results: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    promoted: Mapped[int] = mapped_column(Integer)
+    reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    cost_usd: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[str] = mapped_column(String(40))

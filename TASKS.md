@@ -52,10 +52,19 @@ Evidence: `docs/phase3-report.md`.
 - [x] Isolate skill, agent, permission, and memory caches by directory and config version.
 - [x] Keep phases 1–3 green. `agents/agent.py` is the only agent file whose current hash differs from phase 1.
 
-Evidence: `docs/phase4-report.md`. Phase 5 remains unauthorized.
+Evidence: `docs/phase4-report.md`.
+
+## Phase 5: skill gate (complete)
+
+- [x] Store skills, versions, and evaluation reports. Only the active version is searchable or forkable.
+- [x] Turn add, merge, create, evolve, and external file edits into candidates. Baseline import is a separate command.
+- [x] Approve freezes the content hash. A missing suite stays blocked. Promotion is one transaction.
+- [x] Report A/B results and the C comparison. A live run stays manual and stops when the priced cost passes 15 USD.
+- [x] Keep phases 1–4 green. The live model was not called.
+
+Evidence: `docs/phase5-report.md`. Phase 6 remains unauthorized.
 
 ## Later phases: not authorized in this task
-- [ ] Phase 5: database Skill gate, isolated real evaluation, promotion and export.
 - [ ] Phase 6: API, CLI migration, console and reproducible demonstrations.
 
 Proceed only after explicit phase authorization and the preceding acceptance gate passes.

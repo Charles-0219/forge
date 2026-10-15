@@ -1,7 +1,6 @@
-"""Forge event kernel and phase-4 execution path.
+"""Forge event kernel and phase-5 skill gate.
 
-Tool execution, child tasks, and preconfigured MCP calls go through Coordinator.
-This package is not wired into Agent.chat.
+Tool execution, child tasks, MCP, and skill promotion stay outside Agent.chat.
 """
 
 from forge.kernel import Kernel
