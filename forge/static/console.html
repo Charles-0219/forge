@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Forge</title>
+  <style>
+    body { font-family: sans-serif; margin: 1.5rem; line-height: 1.4; }
+    section { margin-top: 1.5rem; }
+    input, button, textarea { font: inherit; }
+    .row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.4rem 0; }
+    pre { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Forge</h1>
+  <p>密钥只留在这次页面的内存里，不会写入地址或浏览器存储。</p>
+  <div class="row">
+    <input id="base" value="http://127.0.0.1:8765" aria-label="服务地址">
+    <input id="key" type="password" placeholder="X-API-Key" aria-label="接口密钥">
+    <input id="conversation" placeholder="会话 ID" aria-label="会话 ID">
+    <button id="load" type="button">读取</button>
+  </div>
+  <section>
+    <h2>事件</h2>
+    <div id="events"></div>
+  </section>
+  <section>
+    <h2>审批</h2>
+    <div id="approvals"></div>
+  </section>
+  <section>
+    <h2>Skill</h2>
+    <div id="skills"></div>
+  </section>
+  <script>
+    const keyInput = document.querySelector("#key");
+    const baseInput = document.querySelector("#base");
+    const conversationInput = document.querySelector("#conversation");
+
+    function line(parent, value) {
+      const node = document.createElement("div");
+      node.textContent = value;
+      parent.appendChild(node);
+    }
+
+    async function readJson(path) {
+      const response = await fetch(baseInput.value.replace(/\/$/, "") + path, {
+        headers: {"X-API-Key": keyInput.value}
+      });
+      const text = await response.text();
+      return {ok: response.ok, body: text};
+    }
+
+    document.querySelector("#load").addEventListener("click", async () => {
+      const eventsNode = document.querySelector("#events");
+      const approvalsNode = document.querySelector("#approvals");
+      const skillsNode = document.querySelector("#skills");
+      eventsNode.replaceChildren();
+      approvalsNode.replaceChildren();
+      skillsNode.replaceChildren();
+      const conversationId = conversationInput.value;
+      const events = await readJson("/v1/conversations/" + encodeURIComponent(conversationId) + "/events");
+      line(eventsNode, events.body);
+      const skills = await readJson("/v1/skills");
+      line(skillsNode, skills.body);
+      const latest = await readJson("/v1/evals/latest");
+      line(skillsNode, latest.body);
+    });
+  </script>
+</body>
+</html>

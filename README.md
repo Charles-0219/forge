@@ -1,6 +1,6 @@
 # Forge：第一阶段底座
 
-本目录是 BearCode 运行时的干净导入。阶段 1 到阶段 5 已在本地实现并通过测试。服务端和 CLI 迁移留在阶段 6。
+本目录是 BearCode 运行时的干净导入。阶段 1 到阶段 6 已在本地实现并通过测试。真实模型调用仍要单独启动。
 
 许可证是 MIT。公开仓库是 <https://github.com/Charles-0219/forge>。权利与历史基线见 `PROVENANCE.md`。已批准的评测样本见 `evals/`。
 
@@ -11,6 +11,8 @@
 阶段 4 把子任务、预先配置的 stdio MCP、Memory 和配置缓存放进同一条执行路径。子代理不再用 `bypassPermissions` 创建。结果见 `docs/phase4-report.md`。
 
 阶段 5 把 Skill 放进数据库门禁。只有 active 版本能被检索或 fork。候选要先批准，再由手动评测决定是否晋升。结果见 `docs/phase5-report.md`。
+
+阶段 6 增加本机 HTTP API、SSE、命令行客户端和静态控制台。模型密钥不进入接口响应。结果见 `docs/phase6-report.md`。
 
 ## 来源与交付
 
@@ -40,4 +42,4 @@ uv pip check --python .venv/bin/python
 
 ## 进入下一阶段
 
-阶段 5 的门禁测试已通过。真实 C 套仍要手动启动，并受 15 美元上限约束。阶段 6 需要单独授权。在那之前，不把 Dispatcher 或 Skill 门禁接进 `Agent.chat`。
+阶段 5 的门禁测试已通过。阶段 6 的本机 API 和演示已通过。真实 C 套仍要手动启动，并受 15 美元上限约束。`agents/` 里的旧循环仍只供阶段 1 回归使用。

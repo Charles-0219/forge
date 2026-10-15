@@ -68,3 +68,11 @@
 阶段 5 没有修改 `agents/*.py`。旧循环仍会直接写 Skill 文件，留到阶段 6。
 
 新的 `forge/skills.py` 只把数据库里的 active 版本交给检索、inline 和 fork。自动提案、外部文件变化和显式创建都先成为候选。批准冻结内容哈希。导出失败只记下错误，不改变 active。评测占用单独的执行槽。留出样本不能进入候选开发输入。真实 C 套调用要手动确认，并且只有给出单价时才执行 15 美元上限。回归测试没有连接模型。
+
+## 阶段 6 本机客户端
+
+阶段 6 没有修改 `agents/*.py`。旧 CLI 仍自己保存消息历史，并保留 `--yolo` 到 `bypassPermissions` 的映射。新的客户端是 `python -m forge.cli`，它只调用 `/v1`。
+
+接口校验 `X-API-Key`。校验失败的响应不回显密钥，请求校验错误也不回显字段值。模型密钥不能作为会话或消息字段提交。SSE 的持久事件 id 是会话 seq；显式 `after_seq` 优先于 `Last-Event-ID`。服务只应监听 `127.0.0.1`。控制台用 `textContent` 显示文本，不把密钥写入 `localStorage`。
+
+演示脚本 `scripts/demo_phase6.py` 使用模拟模型，覆盖拒绝写入、折叠，以及恢复后过期审批返回 410。它不连接 DeepSeek。

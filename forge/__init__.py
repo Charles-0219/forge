@@ -1,6 +1,6 @@
-"""Forge event kernel and phase-5 skill gate.
+"""Forge local API.
 
-Tool execution, child tasks, MCP, and skill promotion stay outside Agent.chat.
+The HTTP service, CLI client, and console call the kernel. Agent.chat is unchanged.
 """
 
 from forge.kernel import Kernel

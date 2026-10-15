@@ -62,9 +62,16 @@ Evidence: `docs/phase4-report.md`.
 - [x] Report A/B results and the C comparison. A live run stays manual and stops when the priced cost passes 15 USD.
 - [x] Keep phases 1–4 green. The live model was not called.
 
-Evidence: `docs/phase5-report.md`. Phase 6 remains unauthorized.
+Evidence: `docs/phase5-report.md`.
+
+## Phase 6: local client (complete)
+
+- [x] Add the `/v1` API with `X-API-Key`, SSE replay, skills, evals, memories, and attachments.
+- [x] Add a loopback CLI client, a static console that does not persist the key, and reproducible demo commands.
+- [x] Keep phases 1–5 green. The live model was not called, and the legacy `agents/` loop remains for those regressions.
+
+Evidence: `docs/phase6-report.md`.
 
 ## Later phases: not authorized in this task
-- [ ] Phase 6: API, CLI migration, console and reproducible demonstrations.
 
-Proceed only after explicit phase authorization and the preceding acceptance gate passes.
+No further phase is defined. Live C-suite evaluation still requires an explicit request.
