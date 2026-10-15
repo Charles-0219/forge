@@ -74,4 +74,4 @@ Evidence: `docs/phase6-report.md`.
 
 ## Later phases: not authorized in this task
 
-No further phase is defined. The C-suite runner can execute holdout tasks, stops at the priced cap, and does not promote. Launching `scripts/run_live_eval.py --confirm-live` is still a separate manual job and needs `APIKEY` plus `FORGE_USD_PER_MILLION`.
+No further phase is defined. The C-suite runner compares dev and holdout tasks with no skill, and adds the candidate or active skill only when that body is supplied. A missing active skill is not applicable and is not called. Launching `scripts/run_live_eval.py --confirm-live` still needs `APIKEY` plus `FORGE_USD_PER_MILLION`. The report does not promote without a recorded runtime-suite pass.

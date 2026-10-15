@@ -9,7 +9,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from forge.c_suite import run_c_suite
+from forge.c_suite import run_comparison, scores_from_report
 from forge.coordinator import Coordinator
 from forge.kernel import Kernel
 from forge.memory_store import MemoryEventStore
@@ -46,7 +46,7 @@ def main(argv: list[str] | None = None, environ: dict[str, str] | None = None, *
     if poster is None:
         poster = _deepseek_poster(env["APIKEY"])
     out = _output_dir(args)
-    report = asyncio.run(_execute(poster, rate, out))
+    report = asyncio.run(_execute(poster, rate, out, args))
     print(
         f"complete={report['complete']} reason={report['reason']} "
         f"cost_usd={report['cost_usd']} promoted={report['promoted']}"
@@ -63,23 +63,36 @@ def _output_dir(args: list[str]) -> Path:
     return Path(tempfile.mkdtemp(prefix="forge-c-suite-"))
 
 
-async def _execute(poster, rate: float, out: Path) -> dict:
+async def _execute(poster, rate: float, out: Path, args: list[str]) -> dict:
     suite = json.loads((ROOT / "evals" / "suite.json").read_text(encoding="utf-8"))
     holdout = json.loads((ROOT / "evals" / "holdout.json").read_text(encoding="utf-8"))
     live = suite["live_eval"]
     kernel = Kernel(MemoryEventStore())
-    report = await run_c_suite(
+    report = await run_comparison(
         kernel,
         Coordinator(kernel),
-        list(holdout["tasks"]),
         poster,
+        dev_tasks=list(suite["dev_tasks"]),
+        holdout_tasks=list(holdout["tasks"]),
         work_root=out / "work",
         usd_per_million=rate,
         cost_cap_usd=float(live["cost_cap_usd"]),
         model=str(live["model"]),
+        candidate=_optional_text(args, "--candidate-file"),
+        active=_optional_text(args, "--active-file"),
     )
+    report["scores"] = scores_from_report(report, a_passed=0, a_total=0)
     (out / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return report
+
+
+def _optional_text(args: list[str], flag: str) -> str | None:
+    if flag not in args:
+        return None
+    path = Path(args[args.index(flag) + 1])
+    if path.name == "holdout.json":
+        raise SystemExit("留出题不能作为候选或 active Skill。")
+    return path.read_text(encoding="utf-8")
 
 
 def _deepseek_poster(api_key: str):

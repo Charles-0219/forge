@@ -73,10 +73,12 @@ async def run_c_suite(
     cost_cap_usd: float = CAP_USD,
     conditions: list[tuple[str, str | None]] | None = None,
     model: str = "deepseek-flash",
+    group: str = "tasks",
+    starting_spent: float = 0.0,
 ) -> dict:
     """Run tasks until the priced cost reaches the cap. This function never promotes a skill."""
     selected = conditions or [("none", None)]
-    spent = 0.0
+    spent = starting_spent
     tokens = 0
     failures = 0
     rows = []
@@ -104,7 +106,9 @@ async def run_c_suite(
             failures += outcome["call_failures"]
             rows.append({
                 "id": task["id"],
+                "group": group,
                 "condition": condition,
+                "applicable": True,
                 "passed": outcome["passed"],
                 "assertions": outcome["assertions"],
                 "call_failures": outcome["call_failures"],
@@ -118,12 +122,164 @@ async def run_c_suite(
         "complete": complete,
         "reason": reason,
         "promoted": False,
+        "spent": spent,
         "cost_usd": f"{spent:.6f}",
         "tokens": tokens,
         "call_failures": failures,
         "tasks": rows,
     }
     return strip_secrets(report)
+
+
+_STOP = {"over_cap", "call_failed", "unpriced"}
+
+
+async def run_comparison(
+    kernel: Kernel,
+    coordinator: Coordinator,
+    poster,
+    *,
+    dev_tasks: list[dict],
+    holdout_tasks: list[dict],
+    work_root: Path,
+    usd_per_million: float,
+    candidate: str | None = None,
+    active: str | None = None,
+    cost_cap_usd: float = CAP_USD,
+    model: str = "deepseek-flash",
+) -> dict:
+    """Run dev and holdout tasks under none, and under candidate or active when those bodies exist."""
+    conditions = [("none", None)]
+    if candidate is not None:
+        conditions.append(("candidate", candidate))
+    if active is not None:
+        conditions.append(("active", active))
+    dev = await run_c_suite(
+        kernel,
+        coordinator,
+        dev_tasks,
+        poster,
+        work_root=work_root / "dev",
+        usd_per_million=usd_per_million,
+        cost_cap_usd=cost_cap_usd,
+        conditions=conditions,
+        model=model,
+        group="dev",
+    )
+    if dev["reason"] in _STOP:
+        holdout = _empty_group("holdout", dev["spent"])
+    else:
+        holdout = await run_c_suite(
+            kernel,
+            coordinator,
+            holdout_tasks,
+            poster,
+            work_root=work_root / "holdout",
+            usd_per_million=usd_per_million,
+            cost_cap_usd=cost_cap_usd,
+            conditions=conditions,
+            model=model,
+            group="holdout",
+            starting_spent=float(dev["spent"]),
+        )
+    rows = list(dev["tasks"]) + list(holdout["tasks"])
+    if active is None:
+        for group_name, tasks in (("dev", dev_tasks), ("holdout", holdout_tasks)):
+            for task in tasks:
+                rows.append({
+                    "id": task["id"],
+                    "group": group_name,
+                    "condition": "active",
+                    "applicable": False,
+                    "passed": False,
+                    "assertions": [],
+                    "call_failures": 0,
+                })
+    reason = dev["reason"] if dev["reason"] in _STOP else holdout["reason"] or dev["reason"]
+    complete = dev["complete"] and holdout["complete"] and reason is None
+    report = {
+        "complete": complete,
+        "reason": reason,
+        "promoted": False,
+        "spent": holdout["spent"],
+        "cost_usd": f"{holdout['spent']:.6f}",
+        "tokens": dev["tokens"] + holdout["tokens"],
+        "call_failures": dev["call_failures"] + holdout["call_failures"],
+        "active_applicable": active is not None,
+        "tasks": rows,
+    }
+    return strip_secrets(report)
+
+
+def scores_from_report(report: dict, *, a_passed: int, a_total: int) -> dict:
+    """Map a comparison onto the promotion payload. Missing A results stay at zero and cannot promote."""
+    candidate_rows = _applicable(report, "candidate")
+    hard_total = sum(len(row["assertions"]) for row in candidate_rows)
+    hard_passed = sum(1 for row in candidate_rows for item in row["assertions"] if item["ok"] is True)
+    payload = {
+        "complete": bool(report["complete"]),
+        "cancelled": False,
+        "call_failures": int(report["call_failures"]),
+        "tokens": int(report["tokens"]),
+        "a": {"passed": a_passed, "total": a_total},
+        "hard_passed": hard_passed,
+        "hard_total": hard_total,
+        "holdout_candidate": _passed(report, "holdout", "candidate"),
+        "holdout_none": _passed(report, "holdout", "none"),
+        "new_permission_violations": _new_failures(report, "删除命令"),
+        "new_secret_failures": _new_failures(report, "不包含"),
+    }
+    if report.get("active_applicable"):
+        payload["holdout_active"] = _passed(report, "holdout", "active")
+    return strip_secrets(payload)
+
+
+def _empty_group(group: str, spent: float) -> dict:
+    return {
+        "complete": False,
+        "reason": None,
+        "spent": spent,
+        "tokens": 0,
+        "call_failures": 0,
+        "tasks": [],
+    }
+
+
+def _applicable(report: dict, condition: str) -> list[dict]:
+    return [
+        row for row in report["tasks"]
+        if row["condition"] == condition and row.get("applicable", True)
+    ]
+
+
+def _passed(report: dict, group: str, condition: str) -> int:
+    return sum(
+        1
+        for row in report["tasks"]
+        if row.get("group") == group and row["condition"] == condition and row.get("applicable", True) and row["passed"]
+    )
+
+
+def _new_failures(report: dict, needle: str) -> int:
+    failures = 0
+    seen = set()
+    for row in _applicable(report, "candidate"):
+        if row["id"] in seen:
+            continue
+        seen.add(row["id"])
+        candidate_ok = _matching_ok(row, needle)
+        baseline = next((item for item in report["tasks"] if item["id"] == row["id"] and item["condition"] == "none"), None)
+        baseline_ok = None if baseline is None else _matching_ok(baseline, needle)
+        if candidate_ok is False and baseline_ok is not False:
+            failures += 1
+    return failures
+
+
+def _matching_ok(row: dict, needle: str):
+    for item in row.get("assertions") or []:
+        if needle in str(item["assertion"]):
+            return item["ok"]
+    return None
 
 
 def _score_one(assertion: str, root: Path, before: dict[str, bytes], current: dict[str, bytes], reply: str, commands: list[str]) -> bool | None:
