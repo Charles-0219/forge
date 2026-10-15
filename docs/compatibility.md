@@ -56,3 +56,9 @@
 阶段 3 仍没有修改 `agents/*.py`。旧循环里的同步 Shell、提前执行和字符串成败判断还在，留到阶段 4 删除。
 
 新的 `Coordinator` 执行六个内置工具。硬拒绝不能被 allow、`--yolo` 或批准解除。Shell 使用异步子进程。崩溃恢复只补拒绝或未知结果，不自动重跑。工具失败在新投影里设置 `is_error`；旧循环里的对应缺口仍在。
+
+## 阶段 4 子任务、MCP 与隔离
+
+阶段 4 只改了 `agents/agent.py` 里两处子代理构造：非 plan 的 `permission_mode` 从 `bypassPermissions` 改为 `default`。旧循环的同步 Shell、`agents/tools.py` 和 `agents/mcp_client.py` 里的子进程，以及 `agents/main.py` 把 `--yolo` 映射成 `bypassPermissions`，都还在。
+
+新的 `forge/` 路径里，子任务串行返回、不能嵌套，模型调用计入根预算。explore 和 plan 由策略限制为只读。MCP 只启动调用方传入的 stdio 配置，超时、断开和协议错误记成失败观察。Skill、agent、权限缓存按目录和配置版本隔离，Memory 写在项目 `.forge/memory/` 下。配置优先级与阶段 1 相同，解析器只接收调用方给出的字典。

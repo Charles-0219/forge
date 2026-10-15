@@ -53,6 +53,7 @@ class PolicyConfig:
     parent_allow_tools: frozenset[str] | None = None
     accept_edits: bool = False
     plan_path: str | None = None
+    mcp_tools: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -72,6 +73,16 @@ def intersect_allowlists(parent: frozenset[str] | None, child: frozenset[str] | 
     if parent is None:
         return child_set
     return child_set & parent
+
+
+def effective_allowlist(config: PolicyConfig) -> frozenset[str]:
+    if config.allow_tools is None:
+        child = BUILTIN_TOOLS | config.mcp_tools
+    else:
+        child = config.allow_tools
+    if config.parent_allow_tools is None:
+        return child
+    return child & config.parent_allow_tools
 
 
 def is_dangerous(command: str) -> bool:
@@ -119,10 +130,12 @@ def evaluate(
 
     ``confirmed`` repeats only the hard checks. An approval cannot lift a hard deny.
     """
-    invalid = _validate(tool_name, arguments)
+    invalid = _validate(tool_name, arguments, config)
     if invalid is not None:
         return Decision("deny", invalid, "unknown", True)
     risk = classify_risk(tool_name, arguments)
+    if tool_name.startswith("mcp__"):
+        risk = "unknown"
     denied = _hard_constraints(
         tool_name=tool_name,
         arguments=arguments,
@@ -141,7 +154,11 @@ def evaluate(
     return _confirm(tool_name, risk, normalize_strategy(strategy), config)
 
 
-def _validate(tool_name: str, arguments: dict) -> str | None:
+def _validate(tool_name: str, arguments: dict, config: PolicyConfig) -> str | None:
+    if tool_name.startswith("mcp__"):
+        if tool_name not in config.mcp_tools or not isinstance(arguments, dict):
+            return "unsupported_tool" if tool_name not in config.mcp_tools else "invalid_arguments"
+        return None
     if tool_name not in BUILTIN_TOOLS:
         return "unsupported_tool"
     if not isinstance(arguments, dict):
@@ -200,7 +217,7 @@ def _hard_constraints(
     path_decision = _path_constraints(tool_name, arguments, mode, config, cwd, events, risk)
     if path_decision is not None:
         return path_decision
-    allowed = intersect_allowlists(config.parent_allow_tools, config.allow_tools)
+    allowed = effective_allowlist(config)
     if tool_name not in allowed:
         return Decision("deny", "tool_not_allowed", risk, True)
     hashed = _content_hash(tool_name, arguments, cwd, events, risk)
@@ -215,7 +232,7 @@ def _hard_constraints(
 
 def _path_constraints(tool_name, arguments, mode, config: PolicyConfig, cwd: str, events, risk) -> Decision | None:
     del events
-    if tool_name == "run_shell":
+    if tool_name == "run_shell" or tool_name.startswith("mcp__"):
         if mode == "plan":
             return Decision("deny", "plan_mode", risk, True)
         return None

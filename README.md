@@ -8,6 +8,8 @@
 
 阶段 3 在同一内核上增加策略、审批、六个内置工具、恢复和折叠。执行入口是 `Coordinator`，不替换 `agents/` 里的原循环。结果见 `docs/phase3-report.md`。
 
+阶段 4 把子任务、预先配置的 stdio MCP、Memory 和配置缓存放进同一条执行路径。子代理不再用 `bypassPermissions` 创建。结果见 `docs/phase4-report.md`。
+
 ## 来源与交付
 
 - 基线提交：`9573e652bdd39ebd642da76be1f9f94171ffdece`。
@@ -36,4 +38,4 @@ uv pip check --python .venv/bin/python
 
 ## 进入下一阶段
 
-阶段 3 的执行测试已通过。阶段 4 需要单独授权。在那之前，不把 Dispatcher 接进 `Agent.chat`，也不调用 DeepSeek。
+阶段 3 的执行测试已通过。阶段 4 已在本地实现，尚未推送。阶段 5 需要单独授权。在那之前，不把 Dispatcher 接进 `Agent.chat`，也不调用 DeepSeek。

@@ -16,6 +16,10 @@ class UnitOfWork(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    async def list_conversations(self) -> list[Conversation]:
+        raise NotImplementedError
+
+    @abstractmethod
     async def insert_run(self, run: Run) -> Run:
         raise NotImplementedError
 

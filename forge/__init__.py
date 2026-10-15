@@ -1,6 +1,7 @@
-"""Forge event kernel and phase-3 execution path.
+"""Forge event kernel and phase-4 execution path.
 
-Tool execution goes through Coordinator. This package is not wired into Agent.chat.
+Tool execution, child tasks, and preconfigured MCP calls go through Coordinator.
+This package is not wired into Agent.chat.
 """
 
 from forge.kernel import Kernel

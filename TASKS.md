@@ -42,10 +42,19 @@ Evidence: `docs/phase2-report.md`.
 - [x] Add pause, cancel, terminal guards, crash recovery, plan approval, and fold.
 - [x] Keep the phase-1 agent runtime hashes and the phase-2 kernel tests green.
 
-Evidence: `docs/phase3-report.md`. Phase 4 remains unauthorized.
+Evidence: `docs/phase3-report.md`.
+
+## Phase 4: child tasks, MCP, and isolation (complete)
+
+- [x] Run child tasks through the phase-3 execution path, with serial fork-return, no nesting, and a shared root budget.
+- [x] Remove the two child `bypassPermissions` constructions. explore, plan, and an empty allowlist cannot write or run shell.
+- [x] Call only preconfigured stdio MCP tools through the dispatcher, and record timeout, disconnect, and protocol failures as observations.
+- [x] Isolate skill, agent, permission, and memory caches by directory and config version.
+- [x] Keep phases 1–3 green. `agents/agent.py` is the only agent file whose current hash differs from phase 1.
+
+Evidence: `docs/phase4-report.md`. Phase 5 remains unauthorized.
 
 ## Later phases: not authorized in this task
-- [ ] Phase 4: MCP/subagent/Memory/config isolation and shared root budgets.
 - [ ] Phase 5: database Skill gate, isolated real evaluation, promotion and export.
 - [ ] Phase 6: API, CLI migration, console and reproducible demonstrations.
 

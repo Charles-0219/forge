@@ -111,6 +111,10 @@ class SqliteUnitOfWork(UnitOfWork):
         row = await self._session.get(ConversationRow, conversation_id)
         return _conversation(row) if row else None
 
+    async def list_conversations(self) -> list[Conversation]:
+        result = await self._session.execute(select(ConversationRow))
+        return [_conversation(row) for row in result.scalars()]
+
     async def insert_run(self, run: Run) -> Run:
         self._before_write()
         self._session.add(RunRow(

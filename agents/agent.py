@@ -1158,7 +1158,7 @@ class Agent:
                 custom_system_prompt=result["prompt"],
                 custom_tools=tools,
                 is_sub_agent=True,
-                permission_mode="plan" if self.permission_mode == "plan" else "bypassPermissions",
+                permission_mode="plan" if self.permission_mode == "plan" else "default",
             )
             try:
                 sub_result = await sub_agent.run_once(inp.get("args") or "Execute this skill task.")
@@ -1277,7 +1277,7 @@ class Agent:
             custom_system_prompt=config["system_prompt"],
             custom_tools=config["tools"],
             is_sub_agent=True,
-            permission_mode="plan" if self.permission_mode == "plan" else "bypassPermissions",
+            permission_mode="plan" if self.permission_mode == "plan" else "default",
         )
         try:
             result = await sub_agent.run_once(prompt)

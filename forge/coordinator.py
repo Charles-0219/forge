@@ -49,6 +49,7 @@ class Coordinator:
         self.processes: dict = {}
         self.attachments: dict[str, dict] = {}
         self.after_execute = None
+        self.mcp = None
         self.dispatcher = Dispatcher(
             processes=self.processes,
             attachments=self.attachments,
@@ -59,6 +60,17 @@ class Coordinator:
     def configure(self, conversation_id: str, config: PolicyConfig) -> None:
         self.configs[conversation_id] = config
 
+    def bind_mcp(self, registry) -> None:
+        self.mcp = registry
+
+    async def _run_job(self, job):
+        if job.tool_name.startswith("mcp__"):
+            if self.mcp is None:
+                from forge.dispatcher import ToolResult
+                return ToolResult("error", "", error={"code": "mcp_unavailable"})
+            return await self.mcp.call(job)
+        return await self.dispatcher.run(job)
+
     async def dispatch(self, conversation_id: str, run_id: str) -> None:
         for _ in range(10000):
             step = await self._claim(conversation_id, run_id)
@@ -66,7 +78,7 @@ class Coordinator:
                 return
             if step.kind == "again":
                 continue
-            result = await self.dispatcher.run(step.job)
+            result = await self._run_job(step.job)
             if self.after_execute is not None:
                 self.after_execute()
             await self._commit_result(step.job, result)
@@ -77,7 +89,7 @@ class Coordinator:
             raise Conflict(f"unsupported approval decision: {decision}")
         recorded = await self._record_decision(approval_id, decision, arguments_hash_value)
         if recorded.job is not None:
-            result = await self.dispatcher.run(recorded.job)
+            result = await self._run_job(recorded.job)
             if self.after_execute is not None:
                 self.after_execute()
             await self._commit_result(recorded.job, result)

@@ -31,6 +31,9 @@ class MemoryUnitOfWork(UnitOfWork):
     async def get_conversation(self, conversation_id: str) -> Conversation | None:
         return self._state.conversations.get(conversation_id)
 
+    async def list_conversations(self) -> list[Conversation]:
+        return list(self._state.conversations.values())
+
     async def insert_run(self, run: Run) -> Run:
         self._before_write()
         self._state.runs[run.id] = run
