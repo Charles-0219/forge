@@ -23,3 +23,7 @@ class DuplicateTerminal(ForgeError):
 
 class ProtocolMismatch(ForgeError):
     code = 409
+
+
+class Gone(ForgeError):
+    code = 410

@@ -4,7 +4,9 @@
 
 许可证是 MIT。公开仓库是 <https://github.com/Charles-0219/forge>。权利与历史基线见 `PROVENANCE.md`。已批准的评测样本见 `evals/`。
 
-阶段 2 增加了 `forge/` 事件内核。它记录会话、动作和双协议投影，并把同一套行为落到内存或 SQLite。它不执行工具，也不替换 `agents/` 里的原循环。结果见 `docs/phase2-report.md`。
+阶段 2 增加了 `forge/` 事件内核。它记录会话、动作和双协议投影，并把同一套行为落到内存或 SQLite。
+
+阶段 3 在同一内核上增加策略、审批、六个内置工具、恢复和折叠。执行入口是 `Coordinator`，不替换 `agents/` 里的原循环。结果见 `docs/phase3-report.md`。
 
 ## 来源与交付
 
@@ -34,4 +36,4 @@ uv pip check --python .venv/bin/python
 
 ## 进入下一阶段
 
-阶段 2 的投影和事务测试已通过。阶段 3 需要单独授权。在那之前，不把 Dispatcher、真实工具执行或 DeepSeek 调用接进事件内核。
+阶段 3 的执行测试已通过。阶段 4 需要单独授权。在那之前，不把 Dispatcher 接进 `Agent.chat`，也不调用 DeepSeek。

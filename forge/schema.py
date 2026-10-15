@@ -80,3 +80,7 @@ class ApprovalRow(Base):
     decision: Mapped[str | None] = mapped_column(String(32), nullable=True)
     decided_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     created_at: Mapped[str] = mapped_column(String(40))
+    arguments_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    arguments: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    status: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    basis: Mapped[dict | None] = mapped_column(JSON, nullable=True)

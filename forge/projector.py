@@ -4,6 +4,7 @@ from typing import Any
 
 from forge.errors import DuplicateTerminal, IncompletePairing
 from forge.events import PROJECTION_RULE_VERSION, Event, Projection
+from forge.fold import summary_text, visible_events
 from forge.hashing import canonical_json, sha256_text
 
 
@@ -76,9 +77,14 @@ def ensure_paired(events: list[Event]) -> dict[str, Event]:
 
 def dialogue(events: list[Event], protocol: str, terminals: dict[str, Event]) -> list[dict[str, Any]]:
     messages: list[dict[str, Any]] = []
+    view = visible_events(events)
     index = 0
-    while index < len(events):
-        event = events[index]
+    while index < len(view):
+        event = view[index]
+        if event.event_type == "condensation":
+            messages.append({"role": "user", "content": summary_text(event.payload)})
+            index += 1
+            continue
         if event.event_type == "user_message":
             messages.append({"role": "user", "content": str(event.payload.get("body") or "")})
             index += 1
@@ -89,8 +95,8 @@ def dialogue(events: list[Event], protocol: str, terminals: dict[str, Event]) ->
         call_id = str(event.payload["model_call_id"])
         actions: list[Event] = []
         cursor = index + 1
-        while cursor < len(events):
-            candidate = events[cursor]
+        while cursor < len(view):
+            candidate = view[cursor]
             if candidate.event_type != "action" or str(candidate.payload["model_call_id"]) != call_id:
                 break
             actions.append(candidate)
@@ -141,7 +147,7 @@ def _assistant_message(event: Event, actions: list[Event], protocol: str) -> dic
 def _terminal_message(event: Event, protocol: str) -> dict[str, Any]:
     status = str(event.payload["status"])
     output = str(event.payload.get("output") or "")
-    failed = status in {"rejected", "outcome_unknown"}
+    failed = status in {"rejected", "outcome_unknown", "error"}
     if protocol == "openai":
         return {"role": "tool", "tool_call_id": event.payload["tool_call_id"], "content": output}
     block: dict[str, Any] = {

@@ -4,7 +4,7 @@ import copy
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 
-from forge.events import TERMINAL_RUN_STATES, Action, Conversation, Event, Run
+from forge.events import TERMINAL_RUN_STATES, Action, Approval, Conversation, Event, Run
 from forge.store import EventStore, UnitOfWork
 
 
@@ -14,7 +14,7 @@ class _MemoryState:
         self.runs: dict[str, Run] = {}
         self.events: dict[str, list[Event]] = {}
         self.actions: dict[str, Action] = {}
-        self.approvals = 0
+        self.approvals: dict[str, Approval] = {}
 
 
 class MemoryUnitOfWork(UnitOfWork):
@@ -60,6 +60,15 @@ class MemoryUnitOfWork(UnitOfWork):
             run.usage = usage
         return run
 
+    async def list_runs(self) -> list[Run]:
+        return list(self._state.runs.values())
+
+    async def update_conversation(self, conversation_id: str, *, mode: str) -> Conversation:
+        self._before_write()
+        conversation = self._state.conversations[conversation_id]
+        conversation.mode = mode
+        return conversation
+
     async def insert_event(self, event: Event) -> Event:
         self._before_write()
         self._state.events.setdefault(event.conversation_id, []).append(event)
@@ -82,6 +91,18 @@ class MemoryUnitOfWork(UnitOfWork):
     async def get_action(self, action_id: str) -> Action | None:
         return self._state.actions.get(action_id)
 
+    async def list_actions(self, conversation_id: str | None = None) -> list[Action]:
+        actions = list(self._state.actions.values())
+        if conversation_id is None:
+            return actions
+        return [action for action in actions if action.conversation_id == conversation_id]
+
+    async def update_action_state(self, action_id: str, *, state: str) -> Action:
+        self._before_write()
+        action = self._state.actions[action_id]
+        action.state = state
+        return action
+
     async def update_action_terminal(self, action_id: str, *, state: str, terminal_event_id: str) -> Action:
         self._before_write()
         action = self._state.actions[action_id]
@@ -89,8 +110,24 @@ class MemoryUnitOfWork(UnitOfWork):
         action.terminal_event_id = terminal_event_id
         return action
 
+    async def insert_approval(self, approval: Approval) -> Approval:
+        self._before_write()
+        self._state.approvals[approval.id] = approval
+        return approval
+
+    async def get_approval(self, approval_id: str) -> Approval | None:
+        return self._state.approvals.get(approval_id)
+
+    async def update_approval(self, approval: Approval) -> Approval:
+        self._before_write()
+        self._state.approvals[approval.id] = approval
+        return approval
+
+    async def list_approvals(self) -> list[Approval]:
+        return list(self._state.approvals.values())
+
     async def count_approvals(self) -> int:
-        return self._state.approvals
+        return len(self._state.approvals)
 
 
 class MemoryEventStore(EventStore):

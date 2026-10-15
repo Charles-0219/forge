@@ -112,6 +112,21 @@ class ModelTurn:
 
 
 @dataclass
+class Approval:
+    id: str
+    conversation_id: str
+    subject_type: str
+    subject_id: str
+    decision: str | None
+    decided_at: str | None
+    created_at: str
+    arguments_hash: str | None = None
+    arguments: dict | None = None
+    status: str = "pending"
+    basis: dict | None = None
+
+
+@dataclass
 class Projection:
     protocol: str
     system: str

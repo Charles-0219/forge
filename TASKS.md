@@ -32,10 +32,19 @@ Known later-phase risks and publication-license prerequisites remain open; see t
 - [x] Project recorded context without rereading disk or calling a model.
 - [x] Keep the phase-1 agent runtime hashes and regressions green.
 
-Evidence: `docs/phase2-report.md`. Phase 3 remains unauthorized.
+Evidence: `docs/phase2-report.md`.
+
+## Phase 3: unified execution (complete)
+
+- [x] Add policy checks that hard denies cannot be lifted by allow, yolo, or an approval.
+- [x] Bind approvals to an action and its argument hash; repeat, conflict, and expiry stay distinct.
+- [x] Execute the six built-in tools asynchronously and record structured results.
+- [x] Add pause, cancel, terminal guards, crash recovery, plan approval, and fold.
+- [x] Keep the phase-1 agent runtime hashes and the phase-2 kernel tests green.
+
+Evidence: `docs/phase3-report.md`. Phase 4 remains unauthorized.
 
 ## Later phases: not authorized in this task
-- [ ] Phase 3: unified policy/dispatch, approvals, async execution, lifecycle and recovery.
 - [ ] Phase 4: MCP/subagent/Memory/config isolation and shared root budgets.
 - [ ] Phase 5: database Skill gate, isolated real evaluation, promotion and export.
 - [ ] Phase 6: API, CLI migration, console and reproducible demonstrations.

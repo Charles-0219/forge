@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator, Callable
 
-from forge.events import Action, Conversation, Event, Run
+from forge.events import Action, Approval, Conversation, Event, Run
 
 
 class UnitOfWork(ABC):
@@ -36,6 +36,14 @@ class UnitOfWork(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    async def list_runs(self) -> list[Run]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update_conversation(self, conversation_id: str, *, mode: str) -> Conversation:
+        raise NotImplementedError
+
+    @abstractmethod
     async def insert_event(self, event: Event) -> Event:
         raise NotImplementedError
 
@@ -56,7 +64,31 @@ class UnitOfWork(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    async def list_actions(self, conversation_id: str | None = None) -> list[Action]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update_action_state(self, action_id: str, *, state: str) -> Action:
+        raise NotImplementedError
+
+    @abstractmethod
     async def update_action_terminal(self, action_id: str, *, state: str, terminal_event_id: str) -> Action:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def insert_approval(self, approval: Approval) -> Approval:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_approval(self, approval_id: str) -> Approval | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update_approval(self, approval: Approval) -> Approval:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def list_approvals(self) -> list[Approval]:
         raise NotImplementedError
 
     @abstractmethod

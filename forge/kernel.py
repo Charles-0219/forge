@@ -214,6 +214,21 @@ class Kernel:
         async with self.store.transaction() as unit:
             return await unit.count_approvals()
 
+    async def get_conversation(self, conversation_id: str) -> Conversation:
+        async with self.store.transaction() as unit:
+            return await self._require_conversation(unit, conversation_id)
+
+    async def get_run(self, run_id: str) -> Run:
+        async with self.store.transaction() as unit:
+            run = await unit.get_run(run_id)
+            if run is None:
+                raise NotFound(f"run not found: {run_id}")
+            return run
+
+    async def list_actions(self, conversation_id: str) -> list[Action]:
+        async with self.store.transaction() as unit:
+            return await unit.list_actions(conversation_id)
+
     async def _record_turn(self, unit, conversation_id: str, run_id: str, turn: ModelTurn) -> None:
         run = await unit.get_run(run_id)
         if run is None or run.conversation_id != conversation_id:

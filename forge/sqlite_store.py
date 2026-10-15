@@ -7,7 +7,7 @@ from pathlib import Path
 from sqlalchemy import event, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from forge.events import TERMINAL_RUN_STATES, Action, Conversation, Event, Run
+from forge.events import TERMINAL_RUN_STATES, Action, Approval, Conversation, Event, Run
 from forge.migrate import upgrade
 from forge.schema import ActionRow, ApprovalRow, ConversationRow, EventRow, RunRow
 from forge.store import EventStore, UnitOfWork
@@ -67,6 +67,22 @@ def _action(row: ActionRow) -> Action:
         arguments_hash=row.arguments_hash,
         state=row.state,
         terminal_event_id=row.terminal_event_id,
+    )
+
+
+def _approval(row: ApprovalRow) -> Approval:
+    return Approval(
+        id=row.id,
+        conversation_id=row.conversation_id,
+        subject_type=row.subject_type,
+        subject_id=row.subject_id,
+        decision=row.decision,
+        decided_at=row.decided_at,
+        created_at=row.created_at,
+        arguments_hash=row.arguments_hash,
+        arguments=dict(row.arguments) if row.arguments is not None else None,
+        status=row.status or "pending",
+        basis=dict(row.basis) if row.basis is not None else None,
     )
 
 
@@ -144,6 +160,19 @@ class SqliteUnitOfWork(UnitOfWork):
         await self._session.flush()
         return _run(row)
 
+    async def list_runs(self) -> list[Run]:
+        result = await self._session.execute(select(RunRow))
+        return [_run(row) for row in result.scalars()]
+
+    async def update_conversation(self, conversation_id: str, *, mode: str) -> Conversation:
+        self._before_write()
+        row = await self._session.get(ConversationRow, conversation_id)
+        if row is None:
+            raise KeyError(conversation_id)
+        row.mode = mode
+        await self._session.flush()
+        return _conversation(row)
+
     async def insert_event(self, event: Event) -> Event:
         self._before_write()
         self._session.add(EventRow(
@@ -194,6 +223,22 @@ class SqliteUnitOfWork(UnitOfWork):
         row = await self._session.get(ActionRow, action_id)
         return _action(row) if row else None
 
+    async def list_actions(self, conversation_id: str | None = None) -> list[Action]:
+        stmt = select(ActionRow)
+        if conversation_id is not None:
+            stmt = stmt.where(ActionRow.conversation_id == conversation_id)
+        result = await self._session.execute(stmt)
+        return [_action(row) for row in result.scalars()]
+
+    async def update_action_state(self, action_id: str, *, state: str) -> Action:
+        self._before_write()
+        row = await self._session.get(ActionRow, action_id)
+        if row is None:
+            raise KeyError(action_id)
+        row.state = state
+        await self._session.flush()
+        return _action(row)
+
     async def update_action_terminal(self, action_id: str, *, state: str, terminal_event_id: str) -> Action:
         self._before_write()
         row = await self._session.get(ActionRow, action_id)
@@ -203,6 +248,46 @@ class SqliteUnitOfWork(UnitOfWork):
         row.terminal_event_id = terminal_event_id
         await self._session.flush()
         return _action(row)
+
+    async def insert_approval(self, approval: Approval) -> Approval:
+        self._before_write()
+        self._session.add(ApprovalRow(
+            id=approval.id,
+            conversation_id=approval.conversation_id,
+            subject_type=approval.subject_type,
+            subject_id=approval.subject_id,
+            decision=approval.decision,
+            decided_at=approval.decided_at,
+            created_at=approval.created_at,
+            arguments_hash=approval.arguments_hash,
+            arguments=approval.arguments,
+            status=approval.status,
+            basis=approval.basis,
+        ))
+        await self._session.flush()
+        return approval
+
+    async def get_approval(self, approval_id: str) -> Approval | None:
+        row = await self._session.get(ApprovalRow, approval_id)
+        return _approval(row) if row else None
+
+    async def update_approval(self, approval: Approval) -> Approval:
+        self._before_write()
+        row = await self._session.get(ApprovalRow, approval.id)
+        if row is None:
+            raise KeyError(approval.id)
+        row.decision = approval.decision
+        row.decided_at = approval.decided_at
+        row.arguments_hash = approval.arguments_hash
+        row.arguments = approval.arguments
+        row.status = approval.status
+        row.basis = approval.basis
+        await self._session.flush()
+        return _approval(row)
+
+    async def list_approvals(self) -> list[Approval]:
+        result = await self._session.execute(select(ApprovalRow))
+        return [_approval(row) for row in result.scalars()]
 
     async def count_approvals(self) -> int:
         result = await self._session.execute(select(ApprovalRow.id))

@@ -49,4 +49,10 @@
 
 阶段 2 没有修改 `agents/*.py`。原循环的权限、Shell、子代理和 Skill 行为保持阶段 1 的状态。
 
-新增 `forge/` 只接受模拟的 OpenAI / Anthropic 响应，写入事件并投影。真实模型、MCP 和工具执行仍然没有接入。Anthropic 预算跳过在新投影里设置 `is_error`；旧循环里的对应缺口留到阶段 3。
+新增 `forge/` 只接受模拟的 OpenAI / Anthropic 响应，写入事件并投影。真实模型、MCP 和工具执行当时没有接入。Anthropic 预算跳过在新投影里设置 `is_error`。
+
+## 阶段 3 统一执行
+
+阶段 3 仍没有修改 `agents/*.py`。旧循环里的同步 Shell、提前执行和字符串成败判断还在，留到阶段 4 删除。
+
+新的 `Coordinator` 执行六个内置工具。硬拒绝不能被 allow、`--yolo` 或批准解除。Shell 使用异步子进程。崩溃恢复只补拒绝或未知结果，不自动重跑。工具失败在新投影里设置 `is_error`；旧循环里的对应缺口仍在。

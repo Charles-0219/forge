@@ -1,6 +1,6 @@
-"""Forge phase-2 event kernel.
+"""Forge event kernel and phase-3 execution path.
 
-This package records and projects conversations. It does not execute tools.
+Tool execution goes through Coordinator. This package is not wired into Agent.chat.
 """
 
 from forge.kernel import Kernel
