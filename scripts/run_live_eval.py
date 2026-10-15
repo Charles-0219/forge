@@ -9,14 +9,17 @@ import sys
 import tempfile
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from forge.c_suite import run_comparison, scores_from_report
 from forge.coordinator import Coordinator
+from forge.gate import runtime_counts, runtime_digest
+from forge.hashing import sha256_text
 from forge.kernel import Kernel
 from forge.memory_store import MemoryEventStore
 from forge.skills import live_guard
-
-
-ROOT = Path(__file__).resolve().parents[1]
 
 
 def main(argv: list[str] | None = None, environ: dict[str, str] | None = None, *, poster=None, connect: bool = False) -> int:
@@ -43,10 +46,14 @@ def main(argv: list[str] | None = None, environ: dict[str, str] | None = None, *
     if rate <= 0:
         print("FORGE_USD_PER_MILLION 必须大于 0。本次没有连接模型。")
         return 2
+    candidate = _optional_text(args, "--candidate-file")
+    if candidate is not None and not _matches_approval(candidate):
+        print("候选文件与已批准的冻结技能哈希不一致。本次没有连接模型。")
+        return 2
     if poster is None:
         poster = _deepseek_poster(env["APIKEY"])
     out = _output_dir(args)
-    report = asyncio.run(_execute(poster, rate, out, args))
+    report = asyncio.run(_execute(poster, rate, out, args, candidate))
     print(
         f"complete={report['complete']} reason={report['reason']} "
         f"cost_usd={report['cost_usd']} promoted={report['promoted']}"
@@ -63,7 +70,7 @@ def _output_dir(args: list[str]) -> Path:
     return Path(tempfile.mkdtemp(prefix="forge-c-suite-"))
 
 
-async def _execute(poster, rate: float, out: Path, args: list[str]) -> dict:
+async def _execute(poster, rate: float, out: Path, args: list[str], candidate: str | None) -> dict:
     suite = json.loads((ROOT / "evals" / "suite.json").read_text(encoding="utf-8"))
     holdout = json.loads((ROOT / "evals" / "holdout.json").read_text(encoding="utf-8"))
     live = suite["live_eval"]
@@ -78,12 +85,29 @@ async def _execute(poster, rate: float, out: Path, args: list[str]) -> dict:
         usd_per_million=rate,
         cost_cap_usd=float(live["cost_cap_usd"]),
         model=str(live["model"]),
-        candidate=_optional_text(args, "--candidate-file"),
+        candidate=candidate,
         active=_optional_text(args, "--active-file"),
     )
-    report["scores"] = scores_from_report(report, a_passed=0, a_total=0)
+    passed, total = _recorded_runtime_counts()
+    report["scores"] = scores_from_report(report, a_passed=passed, a_total=total)
     (out / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return report
+
+
+def _recorded_runtime_counts() -> tuple[int, int]:
+    path = ROOT / "evals" / "gate-record.json"
+    if not path.exists():
+        return 0, 0
+    record = json.loads(path.read_text(encoding="utf-8"))
+    return runtime_counts(record, runtime_digest(ROOT))
+
+
+def _matches_approval(body: str) -> bool:
+    path = ROOT / "evals" / "gate-record.json"
+    if not path.exists():
+        return False
+    record = json.loads(path.read_text(encoding="utf-8"))
+    return record.get("status") == "approved" and sha256_text(body) == record.get("content_hash")
 
 
 def _optional_text(args: list[str], flag: str) -> str | None:

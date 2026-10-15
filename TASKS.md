@@ -74,4 +74,4 @@ Evidence: `docs/phase6-report.md`.
 
 ## Later phases: not authorized in this task
 
-No further phase is defined. The C-suite runner compares dev and holdout tasks with no skill, and adds the candidate or active skill only when that body is supplied. A missing active skill is not applicable and is not called. Launching `scripts/run_live_eval.py --confirm-live` still needs `APIKEY` plus `FORGE_USD_PER_MILLION`. The report does not promote without a recorded runtime-suite pass.
+No further phase is defined. `scripts/prepare_gate.py` approves frozen S1 and records a runtime-suite pass for the current source digest. The live script uses that pass only while the digest matches. Launching `scripts/run_live_eval.py --confirm-live` still needs `APIKEY` plus `FORGE_USD_PER_MILLION=1.20`. S1 stays approved until a live comparison promotes it.

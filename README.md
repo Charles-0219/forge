@@ -42,4 +42,4 @@ uv pip check --python .venv/bin/python
 
 ## 进入下一阶段
 
-阶段 5 的门禁测试已通过。阶段 6 的本机 API 和演示已通过。C 套作业对照开发题和留出题，缺省只跑无 Skill 的一路，并在计价后的 15 美元处停下。直接执行 `scripts/run_live_eval.py --confirm-live` 才连接模型。`agents/` 里的旧循环仍只供阶段 1 回归使用。
+阶段 5 的门禁测试已通过。阶段 6 的本机 API 和演示已通过。`scripts/prepare_gate.py` 批准冻结的 S1，并记下这次运行时套件的通过数；S1 在真实对照通过前不是 active。直接执行 `scripts/run_live_eval.py --confirm-live` 才连接模型。`agents/` 里的旧循环仍只供阶段 1 回归使用。
