@@ -74,4 +74,4 @@ Evidence: `docs/phase6-report.md`.
 
 ## Later phases: not authorized in this task
 
-No further phase is defined. Live C-suite evaluation still requires an explicit request.
+No further phase is defined. The C-suite runner can execute holdout tasks, stops at the priced cap, and does not promote. Launching `scripts/run_live_eval.py --confirm-live` is still a separate manual job and needs `APIKEY` plus `FORGE_USD_PER_MILLION`.

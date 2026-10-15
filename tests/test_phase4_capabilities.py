@@ -386,10 +386,13 @@ def test_new_runtime_has_one_effect_path():
         text = path.read_text(encoding="utf-8")
         if "os.chdir" in text or ".chdir(" in text:
             offenders.append(f"chdir:{path.name}")
-        if "subprocess" in text and path.name not in {"dispatcher.py", "mcp.py"}:
+        if "subprocess" in text and path.name not in {"dispatcher.py", "mcp.py", "c_suite.py"}:
             offenders.append(f"subprocess:{path.name}")
         if "bypassPermissions" in text or "SKILL.md" in text:
             offenders.append(f"legacy:{path.name}")
     agent = (ROOT / "agents" / "agent.py").read_text(encoding="utf-8")
+    scoring = (forge_dir / "c_suite.py").read_text(encoding="utf-8")
+    assert '[sys.executable, "-m", "pytest", "-q"]' in scoring
+    assert "shell=True" not in scoring
     assert 'else "bypassPermissions"' not in agent
     assert offenders == []

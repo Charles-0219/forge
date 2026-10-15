@@ -42,4 +42,4 @@ uv pip check --python .venv/bin/python
 
 ## 进入下一阶段
 
-阶段 5 的门禁测试已通过。阶段 6 的本机 API 和演示已通过。真实 C 套仍要手动启动，并受 15 美元上限约束。`agents/` 里的旧循环仍只供阶段 1 回归使用。
+阶段 5 的门禁测试已通过。阶段 6 的本机 API 和演示已通过。C 套作业会在计价后的 15 美元处停下，并且不晋升；直接执行 `scripts/run_live_eval.py --confirm-live` 才连接模型。`agents/` 里的旧循环仍只供阶段 1 回归使用。
