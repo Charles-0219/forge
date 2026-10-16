@@ -10,7 +10,7 @@ from forge.coordinator import Coordinator
 from forge.kernel import Kernel
 from forge.memory_store import MemoryEventStore
 from forge.skills import SkillService
-from scripts.run_live_eval import _optional_text, main
+from scripts.run_live_eval import RUN_CAP_USD, _cost_cap, _optional_text, main
 
 
 def _reply(text: str, prompt_tokens: int = 10, completion_tokens: int = 5, tool_calls=None):
@@ -248,6 +248,13 @@ def test_holdout_assertions_are_scored(tmp_path):
         _correct(task["id"], root)
         scored = score_task(task, root, before, replies.get(task["id"], ""), [])
         assert [item["ok"] for item in scored] == [True] * len(scored), task["id"]
+
+
+def test_confirmed_run_defaults_to_a_five_dollar_stop():
+    assert RUN_CAP_USD == 5
+    assert _cost_cap(["prog"], RUN_CAP_USD) == 5
+    assert _cost_cap(["prog", "--cost-cap", "5"], 15) == 5
+    assert _cost_cap(["prog", "--cost-cap", "0"], 5) is None
 
 
 def test_manual_entry_still_refuses_to_connect(tmp_path):

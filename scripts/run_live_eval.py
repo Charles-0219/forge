@@ -19,7 +19,11 @@ from forge.gate import runtime_counts, runtime_digest
 from forge.hashing import sha256_text
 from forge.kernel import Kernel
 from forge.memory_store import MemoryEventStore
-from forge.skills import live_guard
+from forge.skills import SkillService, live_guard
+from forge.sqlite_store import SqliteEventStore
+
+
+RUN_CAP_USD = 5.0
 
 
 def main(argv: list[str] | None = None, environ: dict[str, str] | None = None, *, poster=None, connect: bool = False) -> int:
@@ -30,7 +34,7 @@ def main(argv: list[str] | None = None, environ: dict[str, str] | None = None, *
         print("C 套真实调用需要手动加上 --confirm-live。本次没有连接模型。")
         return 2
     if reason == "pricing":
-        print("需要 FORGE_USD_PER_MILLION 才能执行 15 美元上限。本次没有连接模型。")
+        print("需要 FORGE_USD_PER_MILLION 才能执行 5 美元上限。本次没有连接模型。")
         return 2
     if reason == "credential":
         print("需要环境变量 APIKEY。本次没有连接模型。")
@@ -46,6 +50,10 @@ def main(argv: list[str] | None = None, environ: dict[str, str] | None = None, *
     if rate <= 0:
         print("FORGE_USD_PER_MILLION 必须大于 0。本次没有连接模型。")
         return 2
+    cap = _cost_cap(args, RUN_CAP_USD)
+    if cap is None:
+        print("费用上限必须是大于 0 的数字。本次没有连接模型。")
+        return 2
     candidate = _optional_text(args, "--candidate-file")
     if candidate is not None and not _matches_approval(candidate):
         print("候选文件与已批准的冻结技能哈希不一致。本次没有连接模型。")
@@ -53,7 +61,7 @@ def main(argv: list[str] | None = None, environ: dict[str, str] | None = None, *
     if poster is None:
         poster = _deepseek_poster(env["APIKEY"])
     out = _output_dir(args)
-    report = asyncio.run(_execute(poster, rate, out, args, candidate))
+    report = asyncio.run(_execute(poster, rate, cap, out, args, candidate))
     print(
         f"complete={report['complete']} reason={report['reason']} "
         f"cost_usd={report['cost_usd']} promoted={report['promoted']}"
@@ -70,7 +78,7 @@ def _output_dir(args: list[str]) -> Path:
     return Path(tempfile.mkdtemp(prefix="forge-c-suite-"))
 
 
-async def _execute(poster, rate: float, out: Path, args: list[str], candidate: str | None) -> dict:
+async def _execute(poster, rate: float, cap: float, out: Path, args: list[str], candidate: str | None) -> dict:
     suite = json.loads((ROOT / "evals" / "suite.json").read_text(encoding="utf-8"))
     holdout = json.loads((ROOT / "evals" / "holdout.json").read_text(encoding="utf-8"))
     live = suite["live_eval"]
@@ -83,15 +91,54 @@ async def _execute(poster, rate: float, out: Path, args: list[str], candidate: s
         holdout_tasks=list(holdout["tasks"]),
         work_root=out / "work",
         usd_per_million=rate,
-        cost_cap_usd=float(live["cost_cap_usd"]),
+        cost_cap_usd=cap,
         model=str(live["model"]),
         candidate=candidate,
         active=_optional_text(args, "--active-file"),
     )
     passed, total = _recorded_runtime_counts()
     report["scores"] = scores_from_report(report, a_passed=passed, a_total=total)
+    report["cost_cap_usd"] = f"{cap:.2f}"
+    if candidate is not None and _matches_approval(candidate):
+        finished = await _settle(report["scores"], rate, cap)
+        report["promoted"] = bool(finished.promoted)
+        report["reason"] = finished.reason
     (out / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return report
+
+
+def _cost_cap(args: list[str], default: float) -> float | None:
+    if "--cost-cap" not in args:
+        return default
+    try:
+        value = float(args[args.index("--cost-cap") + 1])
+    except (IndexError, ValueError):
+        return None
+    if value <= 0:
+        return None
+    return value
+
+
+async def _settle(scores: dict, rate: float, cap: float):
+    record = json.loads((ROOT / "evals" / "gate-record.json").read_text(encoding="utf-8"))
+    store = SqliteEventStore(ROOT / "artifacts" / "local" / "skill-gate.sqlite")
+    await store.open()
+    try:
+        skills = SkillService(Kernel(store), scope="forge")
+        started = await skills.start_eval(
+            str(record["version_id"]),
+            model_ref="deepseek-flash",
+            parameters={"thinking": "disabled"},
+            config_version=str(record["runtime_digest"]),
+        )
+        return await skills.complete_eval(
+            started.id,
+            scores,
+            pricing_usd_per_million=rate,
+            cost_cap_usd=cap,
+        )
+    finally:
+        await store.close()
 
 
 def _recorded_runtime_counts() -> tuple[int, int]:
